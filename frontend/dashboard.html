@@ -68,6 +68,7 @@
 </div>
 
 <script>
+    const API_URL = 'http://localhost:8080';
     let masterPasswordCache = null;
 
     function getMasterPassword() {
@@ -85,7 +86,7 @@
     };
 
     async function loadEntries() {
-        const res = await fetch('https://password-vault-production-d1e3.up.railway.app/vault/list', { headers });
+        const res = await fetch(`${API_URL}/vault/list`, { headers });
         const data = await res.json();
         const container = document.getElementById('entries');
 
@@ -118,7 +119,7 @@
             masterPassword: getMasterPassword()
         };
 
-        const res = await fetch('https://password-vault-production-d1e3.up.railway.app/vault/add', {
+        const res = await fetch(`${API_URL}/vault/add`, {
             method: 'POST',
             headers,
             body: JSON.stringify(body)
@@ -140,7 +141,7 @@
         const masterPassword = getMasterPassword();
         if (!masterPassword) return;
 
-        const res = await fetch(`https://password-vault-production-d1e3.up.railway.app/vault/decrypt/${id}`, {
+        const res = await fetch(`${API_URL}/vault/decrypt/${id}`, {
             method: 'POST',
             headers: { ...headers, 'Content-Type': 'application/json' },
             body: JSON.stringify({ masterPassword })
@@ -153,7 +154,7 @@
     async function deleteEntry(id) {
         if (!confirm('Are you sure you want to delete this entry?')) return;
 
-        const res = await fetch(`https://password-vault-production-d1e3.up.railway.app/vault/delete/${id}`, {
+        const res = await fetch(`${API_URL}/vault/delete/${id}`, {
             method: 'DELETE',
             headers
         });
