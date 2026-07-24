@@ -1,8 +1,8 @@
-# Password Vault 🔐
+# Nullvault 🔐
 
-A secure, zero-knowledge password manager built with Java and Spring Boot. Passwords are encrypted with AES-256 before being stored — the server never has access to your plaintext credentials.
+A secure, zero-knowledge password manager built with Java and Spring Boot. Passwords are encrypted with AES-256-GCM before being stored — the server never has access to your plaintext credentials.
 
-Built as a college cybersecurity project and portfolio piece.
+**Live Demo:** [nullvault.vercel.app](https://nullvault.vercel.app)
 
 ---
 
@@ -10,10 +10,11 @@ Built as a college cybersecurity project and portfolio piece.
 
 - Register and log in with a master password
 - Store passwords for any website or service
-- Passwords are AES-256 encrypted before hitting the database
-- Master password is hashed with PBKDF2 — never stored in plaintext
-- JWT-based authentication with secure HttpOnly cookies
-- View, add, edit, and delete saved credentials
+- Passwords are AES-256-GCM encrypted before hitting the database
+- Master password is hashed with PBKDF2 (310,000 iterations) — never stored in plaintext
+- JWT-based stateless authentication (HMAC-SHA256)
+- View, add, decrypt, and delete saved credentials
+- Response DTOs prevent sensitive fields from leaking via API
 
 ---
 
@@ -23,26 +24,29 @@ Built as a college cybersecurity project and portfolio piece.
 |---|---|
 | Language | Java 17 |
 | Framework | Spring Boot 4 |
-| Security | Spring Security, JWT |
-| Encryption | AES-256, PBKDF2 |
+| Security | Spring Security, JWT (JJWT 0.12.6) |
+| Encryption | AES-256-GCM, PBKDF2 |
 | Database | MySQL 8 |
 | ORM | Hibernate / JPA |
 | Build Tool | Maven |
+| Deployment | Railway |
 
 ---
 
 ## Architecture
 
 ```
-[ Client / Browser ]
-        ↓
-  [ Controller ]     → handles HTTP requests
-        ↓
-  [ Service ]        → business logic + encryption
-        ↓
-  [ Repository ]     → database access
-        ↓
-  [ MySQL Database ] → stores only encrypted data
+[ Browser / Frontend ]
+	↓
+[ JwtFilter ]        → validates token on every request
+	↓
+[ Controller ]       → handles HTTP requests
+	↓
+[ Service ]          → business logic + encryption
+	↓
+[ Repository ]       → database access via JPA
+	↓
+[ MySQL Database ]   → stores only encrypted ciphertext
 ```
 
 ---
@@ -50,13 +54,16 @@ Built as a college cybersecurity project and portfolio piece.
 ## Security Design
 
 **Zero-Knowledge Architecture**
-The server never stores or sees your plaintext passwords. Every password is encrypted with AES-256 before being saved to the database. Even if the database is fully compromised, an attacker only gets encrypted ciphertext.
+The server never stores or sees your plaintext passwords. Every password is encrypted client-side with AES-256-GCM before being saved. Even a full database breach exposes only ciphertext.
 
 **Master Password Hashing**
-The master password is hashed using PBKDF2 with a unique per-user salt. It is never stored in plaintext. Even the developer cannot recover it.
+The master password is hashed using PBKDF2 with 310,000 iterations and a unique per-user salt. It is never stored in plaintext. The derived key is used for encryption — not the password itself.
 
 **JWT Authentication**
-Sessions are managed using JWT tokens stored in HttpOnly cookies — inaccessible to JavaScript, protecting against XSS attacks.
+Stateless authentication using JWT tokens signed with HMAC-SHA256. Tokens expire after 1 hour. The secret key is stored as an environment variable — never in source code.
+
+**Response DTOs**
+API responses never expose sensitive fields like `masterPasswordHash` or `salt` — only safe fields are returned to the client.
 
 ---
 
@@ -81,39 +88,51 @@ CREATE DATABASE passwordvault;
 ```
 
 **3. Set environment variables**
-
-The app reads database credentials from environment variables — never hardcoded.
-
 ```bash
 export DB_USERNAME=your_mysql_username
 export DB_PASSWORD=your_mysql_password
+export JWT_SECRET=your-256-bit-secret-key-must-be-long-enough!!
 ```
 
-Or set them in your IDE run configuration (IntelliJ: Edit Configurations → Environment Variables).
+Or set them in IntelliJ: Edit Configurations → Environment Variables.
 
 **4. Run the app**
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Or run `PasswordVaultApplication.java` directly from IntelliJ.
+**5. Open the frontend**
 
-**5. Open in browser**
-```
-http://localhost:8080
-```
+Open `frontend/index.html` directly in your browser.
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/auth/register` | None | Register new user |
+| POST | `/auth/login` | None | Login, returns JWT |
+| POST | `/vault/add` | JWT | Add encrypted entry |
+| GET | `/vault/list` | JWT | List all entries |
+| POST | `/vault/decrypt/{id}` | JWT | Decrypt a password |
+| DELETE | `/vault/delete/{id}` | JWT | Delete an entry |
+| GET | `/vault/search` | JWT | Search by site name |
 
 ---
 
 ## Project Structure
+src/main/java/com/pervez/password_vault/
 
 ```
-src/main/java/com/pervez/password_vault/
-├── PasswordVaultApplication.java   # Entry point
-├── controller/                     # HTTP request handlers
-├── service/                        # Business logic + encryption
-├── repository/                     # Database queries
-└── model/                          # Entity classes (DB tables)
+├── PasswordVaultApplication.java\
+├── config/          # Security + CORS config
+├── controller/      # HTTP request handlers
+├── dto/             # Response DTOs
+├── model/           # JPA entity classes
+├── repository/      # Database queries
+├── security/        # JWT filter + utility
+└── service/         # Business logic + encryption
 ```
 
 ---
@@ -124,22 +143,22 @@ src/main/java/com/pervez/password_vault/
 |---|---|
 | `DB_USERNAME` | MySQL username |
 | `DB_PASSWORD` | MySQL password |
+| `JWT_SECRET` | HMAC-SHA256 signing secret |
 
 ---
 
 ## Status
 
-🚧 **In active development** — built step by step with full understanding of each component.
-
 | Feature | Status |
 |---|---|
-| Project setup + DB connection | ✅ Done |
-| User entity + registration | ✅ Done |
-| AES-256 encryption service | ✅ Done |
+| User registration + login | ✅ Done |
+| AES-256-GCM encryption | ✅ Done |
+| PBKDF2 password hashing | ✅ Done |
 | Password vault CRUD | ✅ Done |
-| REST API endpoints (Auth + Vault) | ✅ Done |
-| JWT authentication | ⏳ Upcoming |
-| Frontend UI | ⏳ Upcoming |
+| JWT authentication | ✅ Done |
+| Response DTOs | ✅ Done |
+| Frontend UI | ✅ Done |
+| Deployment | ✅ Live on Railway |
 
 ---
 
