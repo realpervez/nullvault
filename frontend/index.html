@@ -3,58 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Vault — Login</title>
+    <title>Nullvault — Zero-Knowledge Password Manager</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="card">
-    <h1>Password Vault</h1>
-    <p class="subtitle">Sign in to your vault</p>
-
-    <div class="form-group">
-        <label>Username</label>
-        <input type="text" id="username" placeholder="Enter username" />
+    <div class="aurora-bg">
+        <div class="aurora-glow"></div>
     </div>
 
-    <div class="form-group">
-        <label>Master Password</label>
-        <input type="password" id="masterPassword" placeholder="Enter master password" />
+    <div class="landing-container">
+        <!-- Navigation -->
+        <header class="nav-bar fade-in stagger-1">
+            <a href="index.html" class="brand" style="margin-bottom: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <span>Nullvault</span>
+            </a>
+            <div class="nav-links">
+                <a href="login.html" class="btn-secondary" style="padding: 8px 16px; font-size: 13px;">Sign In</a>
+                <a href="register.html" class="btn-primary" style="width: auto; padding: 8px 16px; font-size: 13px;">Get Started</a>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <main class="hero-section">
+            <div class="hero-badge fade-in stagger-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 8v4"/>
+                    <path d="M12 16h.01"/>
+                </svg>
+                Zero-Knowledge Local Encryption
+            </div>
+            
+            <h1 class="hero-title fade-in stagger-3">
+                Zero-Knowledge.<br>Infinite Security.
+            </h1>
+            
+            <p class="hero-subtitle fade-in stagger-4">
+                Nullvault encrypts your credentials using AES-256 before they ever leave your browser. The server never sees your plaintext passwords or your master password.
+            </p>
+            
+            <div class="hero-ctas fade-in stagger-4" style="animation-delay: 0.5s;">
+                <a href="register.html" class="btn-accent" style="width: auto; padding: 14px 28px; font-size: 15px;">Create Free Vault</a>
+                <a href="login.html" class="btn-secondary" style="padding: 14px 28px; font-size: 15px;">Access Your Vault</a>
+            </div>
+        </main>
+
+        <!-- Features Section -->
+        <section class="features-grid">
+            <!-- Feature 1 -->
+            <div class="glass-card feature-card fade-in stagger-4" style="animation-delay: 0.6s;">
+                <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                </div>
+                <h3>Zero-Knowledge</h3>
+                <p>Your master password is used to derive encryption keys locally. Plaintext keys never touch our servers, protecting your secrets even if the database is compromised.</p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="glass-card feature-card fade-in stagger-4" style="animation-delay: 0.7s;">
+                <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                </div>
+                <h3>Developer Grade</h3>
+                <p>Built with modern Spring Boot security, secure JWT validation cookies, and a responsive frontend engineered for sub-millisecond search performance.</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="glass-card feature-card fade-in stagger-4" style="animation-delay: 0.8s;">
+                <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="m4.9 19.1 14.2-14.2"/>
+                    </svg>
+                </div>
+                <h3>Zero Tracking</h3>
+                <p>No analytics trackers, no advertising cookies, no marketing scripts. Just your data, encrypted, safe, and fully under your control.</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer fade-in" style="animation-delay: 0.9s;">
+            <div>&copy; 2026 Nullvault. Zero tracking, secure storage.</div>
+            <div style="display: flex; gap: 20px;">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="https://github.com/realpervez/password-vault" target="_blank">GitHub</a>
+            </div>
+        </footer>
     </div>
-
-    <button onclick="login()">Sign In</button>
-    <p class="error" id="error"></p>
-
-    <div class="link">
-        Don't have an account? <a href="register.html">Register</a>
-    </div>
-</div>
-
-<script>
-    async function login() {
-        const username = document.getElementById('username').value;
-        const masterPassword = document.getElementById('masterPassword').value;
-
-        try {
-            const res = await fetch('http://localhost:8080/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, masterPassword })
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('username', data.username);
-                sessionStorage.setItem('masterPassword', masterPassword);
-                window.location.href = 'dashboard.html';
-            } else {
-                const errorText = await res.text();
-                document.getElementById('error').textContent = errorText;
-            }
-        } catch (err) {
-            document.getElementById('error').textContent = 'Could not connect to server.';
-        }
-    }
-</script>
 </body>
 </html>

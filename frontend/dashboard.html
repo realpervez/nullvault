@@ -3,176 +3,831 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Vault — Dashboard</title>
+    <title>Nullvault — Dashboard</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        body { align-items: flex-start; padding: 40px 20px; }
-        .dashboard { width: 100%; max-width: 700px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-        .header h1 { font-size: 22px; }
-        .logout { background: transparent; border: 1px solid #333; color: #fff; width: auto; padding: 8px 16px; margin: 0; }
-        .logout:hover { background: #1a1a1a; }
-        .add-form { background: #111; border: 1px solid #222; border-radius: 12px; padding: 24px; margin-bottom: 32px; }
-        .add-form h2 { font-size: 16px; margin-bottom: 16px; color: #888; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .add-form .form-group { margin-bottom: 12px; }
-        .add-btn { background: #fff; color: #000; width: auto; padding: 10px 24px; margin: 0; margin-top: 8px; }
-        .entries { display: flex; flex-direction: column; gap: 12px; }
-        .entry-card { background: #111; border: 1px solid #222; border-radius: 10px; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .entry-info h3 { font-size: 15px; margin-bottom: 4px; }
-        .entry-info p { font-size: 13px; color: #666; }
-        .entry-actions { display: flex; gap: 8px; }
-        .btn-small { width: auto; padding: 6px 14px; font-size: 12px; margin: 0; background: #1a1a1a; color: #fff; border: 1px solid #333; }
-        .btn-small:hover { background: #222; }
-        .btn-delete { border-color: #ff4444; color: #ff4444; }
-        .btn-delete:hover { background: #1a0000; }
-        .decrypted { font-size: 12px; color: #44ff88; margin-top: 6px; }
-        .empty { text-align: center; color: #444; padding: 40px; }
-    </style>
 </head>
 <body>
-<div class="dashboard">
-    <div class="header">
-        <h1>Your Vault</h1>
-        <button class="logout" onclick="logout()">Sign Out</button>
-    </div>
-
-    <div class="add-form">
-        <h2>Add New Entry</h2>
-        <div class="form-row">
-            <div class="form-group">
-                <label>Site Name</label>
-                <input type="text" id="siteName" placeholder="e.g. Gmail" />
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <a href="index.html" class="brand" style="padding-left: 8px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                    <span>Nullvault</span>
+                </a>
+                
+                <nav class="sidebar-menu">
+                    <a href="#" class="menu-item active">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="7" height="9" x="3" y="3" rx="1"/>
+                            <rect width="7" height="5" x="14" y="3" rx="1"/>
+                            <rect width="7" height="9" x="14" y="12" rx="1"/>
+                            <rect width="7" height="5" x="3" y="16" rx="1"/>
+                        </svg>
+                        <span>All Items</span>
+                    </a>
+                </nav>
             </div>
-            <div class="form-group">
-                <label>Site URL</label>
-                <input type="text" id="siteUrl" placeholder="https://gmail.com" />
+
+            <div class="sidebar-user">
+                <div class="user-info">
+                    <div class="avatar" id="userAvatar">U</div>
+                    <span class="username" id="usernameDisplay">User</span>
+                </div>
+                <button class="logout-btn" onclick="logout()" title="Sign Out">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" x2="9" y1="12" y2="12"/>
+                    </svg>
+                </button>
             </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label>Username / Email</label>
-                <input type="text" id="usernameForSite" placeholder="your@email.com" />
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="plainPassword" placeholder="Site password" />
-            </div>
-        </div>
-        <button class="add-btn" onclick="addEntry()">Add Entry</button>
-    </div>
+        </aside>
 
-    <div class="entries" id="entries">
-        <div class="empty">Loading your vault...</div>
-    </div>
-</div>
+        <!-- Main Dashboard View -->
+        <div class="main-content">
+            <!-- Top Search Header Bar -->
+            <header class="top-bar">
+                <div class="search-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.3-4.3"/>
+                    </svg>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search vault items..." oninput="filterEntries()">
+                </div>
+                <div>
+                    <button class="btn-primary" style="padding: 8px 16px; width: auto; font-size: 13px;" onclick="openModal()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"/>
+                            <path d="M12 5v14"/>
+                        </svg>
+                        <span>Add Entry</span>
+                    </button>
+                </div>
+            </header>
 
-<script>
-    const API_URL = 'http://localhost:8080';
-    let masterPasswordCache = null;
+            <!-- Dashboard Content -->
+            <main class="dashboard-body">
+                <div class="dashboard-header">
+                    <h2>Secure Vault</h2>
+                </div>
 
-    function getMasterPassword() {
-        if (!masterPasswordCache) {
-            masterPasswordCache = sessionStorage.getItem('masterPassword');
-        }
-        return masterPasswordCache;
-    }
-    const token = localStorage.getItem('token');
-    if (!token) window.location.href = 'index.html';
-
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-    };
-
-    async function loadEntries() {
-        const res = await fetch(`${API_URL}/vault/list`, { headers });
-        const data = await res.json();
-        const container = document.getElementById('entries');
-
-        if (!res.ok || data.length === 0) {
-            container.innerHTML = '<div class="empty">No entries yet.</div>';
-            return;
-        }
-
-        container.innerHTML = data.map(entry => `
-                <div class="entry-card" id="entry-${entry.id}">
-                    <div class="entry-info">
-                        <h3>${entry.siteName}</h3>
-                        <p>${entry.usernameForSite} — <a href="${entry.siteUrl}" target="_blank" style="color:#555">${entry.siteUrl}</a></p>
-                        <p class="decrypted" id="decrypted-${entry.id}"></p>
-                    </div>
-                    <div class="entry-actions">
-                        <button class="btn-small" onclick="decrypt(${entry.id})">Reveal</button>
-                        <button class="btn-small btn-delete" onclick="deleteEntry(${entry.id})">Delete</button>
+                <!-- Grid/Entries View -->
+                <div class="vault-grid" id="vaultGrid">
+                    <!-- Loading state initially -->
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <span class="spinner" style="margin-bottom: 12px; width: 24px; height: 24px;"></span>
+                        <p>Syncing secure entries...</p>
                     </div>
                 </div>
-            `).join('');
-    }
+            </main>
+        </div>
+    </div>
 
-    async function addEntry() {
-        const body = {
-            siteName: document.getElementById('siteName').value,
-            siteUrl: document.getElementById('siteUrl').value,
-            usernameForSite: document.getElementById('usernameForSite').value,
-            plainPassword: document.getElementById('plainPassword').value,
-            masterPassword: getMasterPassword()
+    <!-- Add/Edit Entry Modal -->
+    <div class="modal-overlay" id="addModalOverlay" onclick="closeModalOnOverlay(event)">
+        <div class="glass-card modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add Vault Entry</h3>
+                <button class="modal-close" onclick="closeModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18"/>
+                        <path d="m6 6 12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="addEntryForm" onsubmit="event.preventDefault(); saveEntry();">
+                <div class="modal-form-row">
+                    <div class="form-group">
+                        <label for="siteName">Site Name</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="siteName" class="input-field" style="padding-left: 14px;" placeholder="e.g. GitHub" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="siteUrl">Site URL</label>
+                        <div class="input-wrapper">
+                            <input type="url" id="siteUrl" class="input-field" style="padding-left: 14px;" placeholder="https://github.com" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-form-row">
+                    <div class="form-group">
+                        <label for="siteUsername">Username / Email</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="siteUsername" class="input-field" style="padding-left: 14px;" placeholder="your@email.com" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="sitePassword">Password</label>
+                        <div class="input-wrapper" style="display: flex; gap: 8px; align-items: center;">
+                            <div style="position: relative; flex-grow: 1;">
+                                <input type="password" id="sitePassword" class="input-field" style="padding-left: 14px; padding-right: 40px;" placeholder="Enter site password" required>
+                                <button type="button" onclick="toggleModalPasswordVisibility()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; width: auto; padding: 4px; transition: color 0.2s;" id="modalPasswordVisibilityBtn" title="Toggle Visibility">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <button type="button" class="btn-secondary" style="width: auto; padding: 0 12px; margin: 0; display: flex; align-items: center; height: 44px;" onclick="toggleGenerator()" title="Secure Generator Menu">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                                    <path d="M16 3h5v5"/>
+                                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                                    <path d="M8 21H3v-5"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Password Generator Panel (Hidden by default) -->
+                <div id="generatorPanel" class="generator-panel" style="display: none; margin-bottom: 20px; padding: 16px; background: rgba(0,0,0,0.25); border: 1px solid var(--card-border); border-radius: 8px; animation: fadeIn 0.2s ease;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <span style="font-size: 12px; font-weight: 700; color: var(--accent-light); text-transform: uppercase; letter-spacing: 0.5px;">Password Generator</span>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" class="btn-secondary" style="padding: 4px 8px; font-size: 11px; margin: 0; width: auto; display: flex; align-items: center; gap: 4px;" onclick="generatePassword()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                                    <path d="M16 3h5v5"/>
+                                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                                    <path d="M8 21H3v-5"/>
+                                </svg>
+                                <span>Regenerate</span>
+                            </button>
+                            <button type="button" class="btn-primary" style="padding: 4px 10px; font-size: 11px; margin: 0; width: auto; background: var(--accent); color: white;" onclick="applyGeneratedPassword()">Use Password</button>
+                        </div>
+                    </div>
+                    
+                    <div class="password-display-wrapper" style="margin-bottom: 16px; padding: 10px; background: #000; border-color: rgba(255,255,255,0.05);">
+                        <span id="generatedPasswordVal" style="font-family: var(--font-mono); font-size: 14px; color: var(--text-primary); letter-spacing: 0.5px; word-break: break-all;">-</span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <!-- Length -->
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <label style="margin: 0; font-size: 12px; color: var(--text-secondary);">Length (<span id="lenVal">16</span>)</label>
+                            <input type="range" id="genLength" min="6" max="64" value="16" style="width: 60%; cursor: pointer;" oninput="document.getElementById('lenVal').innerText = this.value; generatePassword();">
+                        </div>
+
+                        <!-- Checkboxes row -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); cursor: pointer; text-transform: none;">
+                                <input type="checkbox" id="genUpper" checked onchange="generatePassword()"> A-Z
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); cursor: pointer; text-transform: none;">
+                                <input type="checkbox" id="genLower" checked onchange="generatePassword()"> a-z
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); cursor: pointer; text-transform: none;">
+                                <input type="checkbox" id="genNumbers" checked onchange="generatePassword()"> 0-9
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); cursor: pointer; text-transform: none;">
+                                <input type="checkbox" id="genSpecial" checked onchange="generatePassword()"> !@#$%^&*
+                            </label>
+                        </div>
+
+                        <!-- Avoid ambiguous -->
+                        <div>
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); cursor: pointer; text-transform: none;">
+                                <input type="checkbox" id="genAmbiguous" onchange="generatePassword()"> Avoid ambiguous characters (e.g. l, 1, O, 0)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-danger" id="modalErrorAlert">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" x2="12" y1="8" y2="12"/>
+                        <line x1="12" x2="12.01" y1="16" y2="16"/>
+                    </svg>
+                    <span id="modalErrorMsg">Could not save entry</span>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-accent" id="saveBtn">
+                        <span id="saveBtnText">Save Securely</span>
+                        <span id="saveBtnLoader" class="spinner" style="display: none;"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:8080' 
+            : 'https://password-vault-production-d1e3.up.railway.app';
+            
+        let vaultEntries = [];
+        let decryptedPasswords = {}; // Cache decrypted passwords locally in memory during active page session
+        let editingEntryId = null; // Track ID of entry currently being edited (null if adding new)
+
+        // Verify Authentication
+        const token = sessionStorage.getItem('token');
+        const username = sessionStorage.getItem('username') || 'User';
+        const masterPassword = sessionStorage.getItem('masterPassword');
+
+        if (!token || !masterPassword) {
+            // Redirect to login if unauthenticated
+            window.location.href = 'login.html';
+        }
+
+        // Set User Profile UI
+        document.getElementById('usernameDisplay').textContent = username;
+        document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
         };
 
-        const res = await fetch(`${API_URL}/vault/add`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(body)
-        });
-
-        if (res.ok) {
-            document.getElementById('siteName').value = '';
-            document.getElementById('siteUrl').value = '';
-            document.getElementById('usernameForSite').value = '';
-            document.getElementById('plainPassword').value = '';
-            loadEntries();
-        } else {
-            const errorText = await res.text();
-            alert(errorText);
+        // Modal Operations
+        function openModal() {
+            editingEntryId = null;
+            document.getElementById('modalTitle').textContent = 'Add Vault Entry';
+            document.getElementById('saveBtnText').textContent = 'Save Securely';
+            document.getElementById('modalErrorAlert').style.display = 'none';
+            document.getElementById('generatorPanel').style.display = 'none';
+            document.getElementById('addEntryForm').reset();
+            document.getElementById('addModalOverlay').classList.add('open');
         }
-    }
 
-    async function decrypt(id) {
-        const masterPassword = getMasterPassword();
-        if (!masterPassword) return;
-
-        const res = await fetch(`${API_URL}/vault/decrypt/${id}`, {
-            method: 'POST',
-            headers: { ...headers, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ masterPassword })
-        });
-
-        const text = await res.text();
-        document.getElementById(`decrypted-${id}`).textContent = text;
-    }
-
-    async function deleteEntry(id) {
-        if (!confirm('Are you sure you want to delete this entry?')) return;
-
-        const res = await fetch(`${API_URL}/vault/delete/${id}`, {
-            method: 'DELETE',
-            headers
-        });
-        if (res.ok) {
-            loadEntries();
-        } else {
-            const errorText = await res.text();
-            alert(errorText);
+        function closeModal() {
+            document.getElementById('addModalOverlay').classList.remove('open');
+            editingEntryId = null;
+            
+            // Reset modal password visibility state back to password mask
+            const passwordInput = document.getElementById('sitePassword');
+            passwordInput.type = 'password';
+            document.getElementById('modalPasswordVisibilityBtn').innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            `;
         }
-    }
 
-    function logout() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('username');
-        window.location.href = 'index.html';
-    }
+        function toggleModalPasswordVisibility() {
+            const passwordInput = document.getElementById('sitePassword');
+            const toggleBtn = document.getElementById('modalPasswordVisibilityBtn');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                        <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                        <line x1="2" x2="22" y1="2" y2="22"/>
+                    </svg>
+                `;
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                `;
+            }
+        }
 
-    loadEntries();
-</script>
+        function closeModalOnOverlay(e) {
+            if (e.target.id === 'addModalOverlay') {
+                closeModal();
+            }
+        }
+
+        // Copy password helper
+        async function copyToClipboard(id) {
+            const password = decryptedPasswords[id];
+            if (!password) return;
+            try {
+                await navigator.clipboard.writeText(password);
+                
+                // Show copied feedback on button
+                const btn = document.getElementById(`copyBtn-${id}`);
+                if (btn) {
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+                    setTimeout(() => {
+                        const currentBtn = document.getElementById(`copyBtn-${id}`);
+                        if (currentBtn) currentBtn.innerHTML = originalHTML;
+                    }, 1500);
+                }
+            } catch (err) {
+                console.error('Failed to copy', err);
+            }
+        }
+
+        // Domain helper for favicons
+        function getDomain(url) {
+            try {
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    url = 'https://' + url;
+                }
+                const parsed = new URL(url);
+                return parsed.hostname;
+            } catch (e) {
+                return '';
+            }
+        }
+
+        // Fetch all Entries
+        async function loadEntries() {
+            const container = document.getElementById('vaultGrid');
+            try {
+                const res = await fetch(`${API_BASE_URL}/vault/list`, { headers });
+                
+                if (res.ok) {
+                    vaultEntries = await res.json();
+                    renderEntries(vaultEntries);
+                } else if (res.status === 401) {
+                    logout();
+                } else {
+                    container.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #f87171;">
+                            <p>Failed to synchronize vault details.</p>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #f87171;">
+                        <p>Server connection timeout. Verify you are connected to the network.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Render Entries to the Grid
+        function renderEntries(entriesList) {
+            const container = document.getElementById('vaultGrid');
+            if (entriesList.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-card empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="8" x2="16" y1="12" y2="12"/>
+                            </svg>
+                        </div>
+                        <h3>No secure credentials stored yet</h3>
+                        <p>Begin adding your private accounts to store them safely under zero-knowledge encryption.</p>
+                        <button class="btn-accent" style="width: auto; padding: 8px 20px; font-size: 13px;" onclick="openModal()">Add First Entry</button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = entriesList.map((entry, index) => {
+                const isDecrypted = !!decryptedPasswords[entry.id];
+                const displayPass = isDecrypted ? decryptedPasswords[entry.id] : '••••••••••••';
+                
+                // Get clean domain for site icon
+                const domain = getDomain(entry.siteUrl);
+                const domainLetter = entry.siteName ? entry.siteName.charAt(0).toUpperCase() : 'W';
+                
+                return `
+                    <div class="glass-card vault-card fade-in" style="animation-delay: ${index * 0.05}s;" id="entry-${entry.id}">
+                        <div class="vault-card-top">
+                            <div class="site-meta">
+                                <h4>${escapeHtml(entry.siteName)}</h4>
+                                <a href="${escapeHtml(entry.siteUrl)}" target="_blank">${escapeHtml(entry.siteUrl)}</a>
+                            </div>
+                            
+                            <div style="position: relative; width: 32px; height: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                                ${domain ? `
+                                    <img class="site-favicon" 
+                                         src="https://www.google.com/s2/favicons?sz=128&domain=${domain}" 
+                                         alt=""
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                ` : ''}
+                                <div class="site-logo" style="${domain ? 'display: none;' : ''}">${domainLetter}</div>
+                            </div>
+                        </div>
+
+                        <div class="vault-card-middle">
+                            <div class="site-user">${escapeHtml(entry.usernameForSite)}</div>
+                            <div class="password-display-wrapper">
+                                <span class="password-display ${isDecrypted ? 'decrypted' : ''}" id="pass-${entry.id}">${escapeHtml(displayPass)}</span>
+                                <div id="copyBtnContainer-${entry.id}" style="display: flex; align-items: center; justify-content: center;">
+                                    ${isDecrypted ? `
+                                        <button class="copy-btn" id="copyBtn-${entry.id}" onclick="copyToClipboard(${entry.id})" title="Copy Password">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                                                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                                            </svg>
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="vault-card-actions">
+                            <button class="card-action-btn" onclick="toggleReveal(${entry.id})" id="revealBtn-${entry.id}">
+                                ${isDecrypted ? `
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                                        <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                                        <line x1="2" x2="22" y1="2" y2="22"/>
+                                    </svg>
+                                    <span>Hide</span>
+                                ` : `
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                    <span>Reveal</span>
+                                `}
+                            </button>
+                            <button class="card-action-btn" onclick="openEditModal(${entry.id})" id="editBtn-${entry.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 20h9"/>
+                                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                                </svg>
+                                <span>Edit</span>
+                            </button>
+                            <button class="card-action-btn delete" onclick="deleteEntry(${entry.id})">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 6h18"/>
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                </svg>
+                                <span>Delete</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Save entry (Handles Add & Edit routes)
+        async function saveEntry() {
+            const siteName = document.getElementById('siteName').value.trim();
+            const siteUrl = document.getElementById('siteUrl').value.trim();
+            const usernameForSite = document.getElementById('siteUsername').value.trim();
+            const plainPassword = document.getElementById('sitePassword').value;
+            
+            const saveBtnText = document.getElementById('saveBtnText');
+            const saveBtnLoader = document.getElementById('saveBtnLoader');
+            const modalErrorAlert = document.getElementById('modalErrorAlert');
+            const saveBtn = document.getElementById('saveBtn');
+
+            modalErrorAlert.style.display = 'none';
+            saveBtnText.style.display = 'none';
+            saveBtnLoader.style.display = 'inline-block';
+            saveBtn.disabled = true;
+
+            const body = {
+                siteName,
+                siteUrl,
+                usernameForSite,
+                plainPassword,
+                masterPassword
+            };
+
+            const isEdit = editingEntryId !== null;
+            const endpoint = isEdit ? `/vault/update/${editingEntryId}` : '/vault/add';
+
+            try {
+                const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(body)
+                });
+
+                if (res.ok) {
+                    closeModal();
+                    loadEntries();
+                } else {
+                    const errorText = await res.text();
+                    showModalError(errorText || 'Authentication/Permission denied to save entry.');
+                }
+            } catch (err) {
+                console.error(err);
+                showModalError('Connection lost. Please check if your backend server is up.');
+            } finally {
+                saveBtnText.style.display = 'inline-block';
+                saveBtnLoader.style.display = 'none';
+                saveBtn.disabled = false;
+            }
+        }
+
+        function showModalError(msg) {
+            const alertBox = document.getElementById('modalErrorAlert');
+            const textSpan = document.getElementById('modalErrorMsg');
+            textSpan.textContent = msg;
+            alertBox.style.display = 'flex';
+        }
+
+        // Open Modal in Edit Mode
+        async function openEditModal(id) {
+            const entry = vaultEntries.find(e => e.id === id);
+            if (!entry) return;
+
+            const editBtn = document.getElementById(`editBtn-${id}`);
+            const originalHTML = editBtn.innerHTML;
+
+            // Decrypt password first if not already done
+            if (!decryptedPasswords[id]) {
+                try {
+                    editBtn.innerHTML = `<span class="spinner" style="width: 10px; height: 10px;"></span> <span>Decrypting...</span>`;
+                    editBtn.disabled = true;
+                    
+                    const res = await fetch(`${API_BASE_URL}/vault/decrypt/${id}`, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({ masterPassword })
+                    });
+
+                    if (res.ok) {
+                        const rawText = await res.text();
+                        const prefix = "Decrypted password: ";
+                        decryptedPasswords[id] = rawText.startsWith(prefix) ? rawText.slice(prefix.length) : rawText;
+                    } else {
+                        const errorMsg = await res.text();
+                        alert('Decryption failed: ' + errorMsg);
+                        editBtn.innerHTML = originalHTML;
+                        editBtn.disabled = false;
+                        return;
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Could not contact decryption server.');
+                    editBtn.innerHTML = originalHTML;
+                    editBtn.disabled = false;
+                    return;
+                }
+            }
+
+            // Restore edit button state
+            editBtn.innerHTML = originalHTML;
+            editBtn.disabled = false;
+
+            // Pre-fill modal
+            editingEntryId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Vault Entry';
+            document.getElementById('saveBtnText').textContent = 'Save Changes';
+            document.getElementById('modalErrorAlert').style.display = 'none';
+            document.getElementById('generatorPanel').style.display = 'none';
+            
+            document.getElementById('siteName').value = entry.siteName;
+            document.getElementById('siteUrl').value = entry.siteUrl;
+            document.getElementById('siteUsername').value = entry.usernameForSite;
+            document.getElementById('sitePassword').value = decryptedPasswords[id];
+            
+            document.getElementById('addModalOverlay').classList.add('open');
+        }
+
+        // Toggle Password Reveal State DOM-ONLY (No list re-rendering)
+        async function toggleReveal(id) {
+            const passEl = document.getElementById(`pass-${id}`);
+            const btnEl = document.getElementById(`revealBtn-${id}`);
+            const copyBtnContainer = document.getElementById(`copyBtnContainer-${id}`);
+            if (!passEl || !btnEl || !copyBtnContainer) return;
+            
+            if (decryptedPasswords[id]) {
+                // Hide it
+                delete decryptedPasswords[id];
+                passEl.textContent = '••••••••••••';
+                passEl.classList.remove('decrypted');
+                copyBtnContainer.innerHTML = '';
+                btnEl.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <span>Reveal</span>
+                `;
+            } else {
+                // Fetch decryption from server
+                try {
+                    btnEl.innerHTML = `<span class="spinner" style="width: 10px; height: 10px;"></span> <span>Loading...</span>`;
+                    const res = await fetch(`${API_BASE_URL}/vault/decrypt/${id}`, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({ masterPassword })
+                    });
+
+                    if (res.ok) {
+                        const rawText = await res.text();
+                        const prefix = "Decrypted password: ";
+                        const decryptedPass = rawText.startsWith(prefix) ? rawText.slice(prefix.length) : rawText;
+                        
+                        decryptedPasswords[id] = decryptedPass;
+                        
+                        // Update DOM elements in place
+                        passEl.textContent = decryptedPass;
+                        passEl.classList.add('decrypted');
+                        copyBtnContainer.innerHTML = `
+                            <button class="copy-btn" id="copyBtn-${id}" onclick="copyToClipboard(${id})" title="Copy Password">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                                    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                                </svg>
+                            </button>
+                        `;
+                        btnEl.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                                <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                                <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                                <line x1="2" x2="22" y1="2" y2="22"/>
+                            </svg>
+                            <span>Hide</span>
+                        `;
+                    } else {
+                        const errorMsg = await res.text();
+                        alert('Decryption failed: ' + errorMsg);
+                        renderEntries(vaultEntries);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Could not contact decryption server.');
+                    renderEntries(vaultEntries);
+                }
+            }
+        }
+
+        // Delete secure vault item with smooth transitions (No list re-rendering)
+        async function deleteEntry(id) {
+            if (!confirm('Are you absolute certain you want to delete this secret from your vault? This cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/vault/delete/${id}`, {
+                    method: 'DELETE',
+                    headers
+                });
+
+                if (res.ok) {
+                    const card = document.getElementById(`entry-${id}`);
+                    if (card) {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(15px)';
+                        card.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+                        setTimeout(() => {
+                            card.remove();
+                            // Update local arrays
+                            vaultEntries = vaultEntries.filter(entry => entry.id !== id);
+                            if (decryptedPasswords[id]) delete decryptedPasswords[id];
+                            
+                            // Re-render empty state if nothing left
+                            if (vaultEntries.length === 0) {
+                                renderEntries([]);
+                            }
+                        }, 250);
+                    }
+                } else {
+                    const errorText = await res.text();
+                    alert('Could not delete item: ' + errorText);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Connection error during deletion request.');
+            }
+        }
+
+        // Filter/Search Functionality (Client-Side Search)
+        function filterEntries() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (!query) {
+                renderEntries(vaultEntries);
+                return;
+            }
+
+            const filtered = vaultEntries.filter(entry => {
+                return (entry.siteName && entry.siteName.toLowerCase().includes(query)) ||
+                       (entry.siteUrl && entry.siteUrl.toLowerCase().includes(query)) ||
+                       (entry.usernameForSite && entry.usernameForSite.toLowerCase().includes(query));
+            });
+
+            renderEntries(filtered);
+        }
+
+        // Password Generator Operations
+        function toggleGenerator() {
+            const panel = document.getElementById('generatorPanel');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                generatePassword(); // Initial generation on open
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+
+        function generatePassword() {
+            const length = parseInt(document.getElementById('genLength').value);
+            const upper = document.getElementById('genUpper').checked;
+            const lower = document.getElementById('genLower').checked;
+            const numbers = document.getElementById('genNumbers').checked;
+            const special = document.getElementById('genSpecial').checked;
+            const avoidAmbiguous = document.getElementById('genAmbiguous').checked;
+
+            let charset = '';
+            let upperChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let lowerChars = 'abcdefghijklmnopqrstuvwxyz';
+            let numberChars = '0123456789';
+            let specialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+            if (avoidAmbiguous) {
+                upperChars = upperChars.replace(/[IO]/g, '');
+                lowerChars = lowerChars.replace(/[lo]/g, '');
+                numberChars = numberChars.replace(/[01]/g, '');
+                specialChars = specialChars.replace(/[|]/g, '');
+            }
+
+            let guaranteed = [];
+
+            if (upper) {
+                charset += upperChars;
+                guaranteed.push(upperChars.charAt(Math.floor(Math.random() * upperChars.length)));
+            }
+            if (lower) {
+                charset += lowerChars;
+                guaranteed.push(lowerChars.charAt(Math.floor(Math.random() * lowerChars.length)));
+            }
+            if (numbers) {
+                charset += numberChars;
+                guaranteed.push(numberChars.charAt(Math.floor(Math.random() * numberChars.length)));
+            }
+            if (special) {
+                charset += specialChars;
+                guaranteed.push(specialChars.charAt(Math.floor(Math.random() * specialChars.length)));
+            }
+
+            if (charset.length === 0) {
+                document.getElementById('generatedPasswordVal').innerText = 'Select at least one option';
+                return;
+            }
+
+            let password = '';
+            for (let i = 0; i < guaranteed.length; i++) {
+                password += guaranteed[i];
+            }
+
+            for (let i = password.length; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * charset.length);
+                password += charset.charAt(randomIndex);
+            }
+
+            // Shuffle characters
+            password = password.split('').sort(() => 0.5 - Math.random()).join('');
+            document.getElementById('generatedPasswordVal').innerText = password;
+        }
+
+        function applyGeneratedPassword() {
+            const genVal = document.getElementById('generatedPasswordVal').innerText;
+            if (genVal && genVal !== 'Select at least one option' && genVal !== '-') {
+                const passwordInput = document.getElementById('sitePassword');
+                passwordInput.value = genVal;
+                passwordInput.type = 'text'; // Show password in plaintext
+                
+                // Update toggle button to hide eye-off state icon
+                document.getElementById('modalPasswordVisibilityBtn').innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                        <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                        <line x1="2" x2="22" y1="2" y2="22"/>
+                    </svg>
+                `;
+                
+                document.getElementById('generatorPanel').style.display = 'none';
+            }
+        }
+
+        // Safe HTML injection escape helper
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Logout Flow
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // Load initially
+        loadEntries();
+    </script>
 </body>
 </html>
