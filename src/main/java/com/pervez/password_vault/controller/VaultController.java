@@ -94,4 +94,23 @@ public class VaultController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("/update/{id}")
+    public ResponseEntity<?> updateEntry(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        try {
+            User user = getCurrentUser();
+            PasswordEntry entry = vaultService.updateEntry(
+                    user,
+                    id,
+                    request.get("siteName"),
+                    request.get("siteUrl"),
+                    request.get("usernameForSite"),
+                    request.get("plainPassword"),
+                    request.get("masterPassword")
+            );
+            return ResponseEntity.ok("Password updated with ID: " + entry.getId());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

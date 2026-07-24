@@ -54,4 +54,21 @@ public class VaultService {
     public List<PasswordEntry> searchEntries(User user, String siteName) {
         return passwordEntryRepository.findByUserAndSiteNameContainingIgnoreCase(user, siteName);
     }
+
+    public PasswordEntry updateEntry(User user, Long id, String siteName, String siteUrl,
+                                     String usernameForSite, String plainPassword,
+                                     String masterPassword) throws Exception {
+        PasswordEntry entry = passwordEntryRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new RuntimeException("Entry not found"));
+
+        // Encrypt the password before saving
+        String encrypted = encryptionService.encrypt(plainPassword, masterPassword, user.getSalt());
+
+        entry.setSiteName(siteName);
+        entry.setSiteUrl(siteUrl);
+        entry.setUsernameForSite(usernameForSite);
+        entry.setEncryptedPassword(encrypted);
+
+        return passwordEntryRepository.save(entry);
+    }
 }
