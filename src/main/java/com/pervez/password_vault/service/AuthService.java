@@ -16,23 +16,27 @@ public class AuthService {
 
     public User register(String username, String email, String masterPassword) throws Exception {
 
-        // Check if username already taken
+        if (username == null || username.isBlank()) {
+            throw new RuntimeException("Username cannot be empty");
+        }
+        if (email == null || email.isBlank()) {
+            throw new RuntimeException("Email cannot be empty");
+        }
+        if (masterPassword == null || masterPassword.length() < 8) {
+            throw new RuntimeException("Master password must be at least 8 characters");
+        }
+
         if (userRepository.existsByUsername(username)) {
-            throw new RuntimeException("Username already exists");
+            throw new RuntimeException("This username is already taken");
         }
 
-        // Check if email already taken
         if (userRepository.existsByEmail(email)) {
-            throw new RuntimeException("Email already exists");
+            throw new RuntimeException("An account with this email already exists");
         }
 
-        // Generate unique salt for this user
         String salt = encryptionService.generateSalt();
-
-        // Hash the master password
         String passwordHash = encryptionService.hashPassword(masterPassword, salt);
 
-        // Create and save the user
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
@@ -44,11 +48,13 @@ public class AuthService {
 
     public User login(String username, String masterPassword) throws Exception {
 
-        // Find user by username
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (username == null || username.isBlank() || masterPassword == null || masterPassword.isBlank()) {
+            throw new RuntimeException("Username and password are required");
+        }
 
-        // Verify master password
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Invalid username or password"));
+
         boolean valid = encryptionService.verifyPassword(
                 masterPassword,
                 user.getMasterPasswordHash(),
@@ -56,7 +62,7 @@ public class AuthService {
         );
 
         if (!valid) {
-            throw new RuntimeException("Invalid password");
+            throw new RuntimeException("Invalid username or password");
         }
 
         return user;

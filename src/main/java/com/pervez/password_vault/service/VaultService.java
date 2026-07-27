@@ -5,6 +5,7 @@ import com.pervez.password_vault.model.User;
 import com.pervez.password_vault.repository.PasswordEntryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,10 +22,18 @@ public class VaultService {
                                   String usernameForSite, String plainPassword,
                                   String masterPassword) throws Exception {
 
-        // Encrypt the password before saving
+        if (siteName == null || siteName.isBlank()) {
+            throw new RuntimeException("Site name is required");
+        }
+        if (plainPassword == null || plainPassword.isBlank()) {
+            throw new RuntimeException("Password cannot be empty");
+        }
+        if (masterPassword == null || masterPassword.isBlank()) {
+            throw new RuntimeException("Master password is required to encrypt this entry");
+        }
+
         String encrypted = encryptionService.encrypt(plainPassword, masterPassword, user.getSalt());
 
-        // Create the entry
         PasswordEntry entry = new PasswordEntry();
         entry.setUser(user);
         entry.setSiteName(siteName);
@@ -41,13 +50,24 @@ public class VaultService {
 
     public String decryptEntry(User user, Long entryId, String masterPassword) throws Exception {
 
-        PasswordEntry entry = passwordEntryRepository.findByIdAndUser(entryId, user)
-                .orElseThrow(() -> new RuntimeException("Entry not found"));
+        if (masterPassword == null || masterPassword.isBlank()) {
+            throw new RuntimeException("Master password is required to decrypt this entry");
+        }
 
-        return encryptionService.decrypt(entry.getEncryptedPassword(), masterPassword, user.getSalt());
+        PasswordEntry entry = passwordEntryRepository.findByIdAndUser(entryId, user)
+                .orElseThrow(() -> new RuntimeException("Entry not found or does not belong to you"));
+
+        try {
+            return encryptionService.decrypt(entry.getEncryptedPassword(), masterPassword, user.getSalt());
+        } catch (Exception e) {
+            throw new RuntimeException("Incorrect master password");
+        }
     }
 
+    @Transactional
     public void deleteEntry(User user, Long entryId) {
+        PasswordEntry entry = passwordEntryRepository.findByIdAndUser(entryId, user)
+                .orElseThrow(() -> new RuntimeException("Entry not found or does not belong to you"));
         passwordEntryRepository.deleteByIdAndUser(entryId, user);
     }
 
@@ -58,10 +78,14 @@ public class VaultService {
     public PasswordEntry updateEntry(User user, Long id, String siteName, String siteUrl,
                                      String usernameForSite, String plainPassword,
                                      String masterPassword) throws Exception {
-        PasswordEntry entry = passwordEntryRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new RuntimeException("Entry not found"));
 
-        // Encrypt the password before saving
+        if (masterPassword == null || masterPassword.isBlank()) {
+            throw new RuntimeException("Master password is required to update this entry");
+        }
+
+        PasswordEntry entry = passwordEntryRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new RuntimeException("Entry not found or does not belong to you"));
+
         String encrypted = encryptionService.encrypt(plainPassword, masterPassword, user.getSalt());
 
         entry.setSiteName(siteName);
